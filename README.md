@@ -58,7 +58,7 @@ file_loader.download(file_id, download_folder, overwrite=False)
 An example on how to use the python class can be found in the example.py
 
 ## Usage of FileLoader.exe
-The windows binary is used very similar to the python class. Execute the exe file, 
+The windows binary can be downloaded from this git repo and is used very similar to the python class. Execute the exe file, 
 specify an command and pass some options. The host and api_key options are mandatory.
 
 ```
