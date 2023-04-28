@@ -34,4 +34,8 @@ if project_id and exp_id:
               "id": exp_id,
               "type": "experiment"}
     print(parent)
-    print(file_loader.uploadFile("test_file.txt", parent=parent))
+    file_id = file_loader.uploadFile("test_file.txt", parent=parent)
+    print(file_id)
+
+    print(file_loader.downloadFile(file_id, "test_download"))
+

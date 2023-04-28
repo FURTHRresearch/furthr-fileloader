@@ -3,7 +3,7 @@ import os
 import requests
 import mimetypes
 from pathvalidate import sanitize_filename
-import json
+import sys
 
 
 class FileLoader:
@@ -30,13 +30,16 @@ class FileLoader:
         parameter = {
             "name": fileName
         }
-        response = self.session.post(f"{self.host}/api2/file", json=json.dumps(parameter))
+        response = self.session.post(f"{self.host}/api2/file", json=parameter)
         if response.status_code != 200:
             return
         fileID = response.json()["results"][0]
-        self.updateFile(fileID, filePath, fileName=fileName)
-
-        if parent:
+        result = self.updateFile(fileID, filePath, fileName=fileName)
+        if not result:
+            print("Upload not successful")
+            return
+        print(f"Upload successful, file_id: {file_id}")
+        if parent and result:
             _print = False
             if "type" not in parent:
                 _print = True
@@ -54,9 +57,10 @@ class FileLoader:
             files.append({"id": fileID})
             parameter = {"id": parent["id"],
                          "files": files}
-            response = self.session.post(f"{self.host}/api2/project/{parent['project']}/{parent['type']}", data=json.dumps(parameter))
+            response = self.session.post(f"{self.host}/api2/project/{parent['project']}/{parent['type']}", json=parameter)
             if response.status_code != 200:
                 print("file not attached to parent")
+            print(f"File attached to parent: file_id: {fileID}")
 
         return fileID
 
@@ -102,7 +106,7 @@ class FileLoader:
             "chunks": chunkIDList,
             "name": fileName
         }
-        response = self.session.post(f"{self.host}/api2/file", json=json.dumps(parameter))
+        response = self.session.post(f"{self.host}/api2/file", json=parameter)
         if response.status_code != 200:
             return False
         return True
@@ -157,7 +161,7 @@ class FileLoader:
             "s3key": uploadData['key'],
             "name": fileName
         }
-        response = self.session.post(f"{self.host}/api2/file", json=json.dumps(parameter))
+        response = self.session.post(f"{self.host}/api2/file", json=parameter)
         if response.status_code != 200:
             return False
         return True
@@ -186,8 +190,63 @@ class FileLoader:
                 if chunk:  # filter out keep-alive new chunks
                     newFile.write(chunk)
 
+        print(f"Download successful, file_id: {file_id}")
+
         return True, filePath
 
 
     def getMD5(self, byteData):
         return hashlib.md5(byteData).hexdigest()
+
+if __name__ == "__main__":
+    argv = sys.argv[1:]
+    kwargs = {kw[0]: kw[1] for kw in [ar.split('=') for ar in argv if ar.find('=') > 0]}
+    args = [arg for arg in argv if arg.find('=') < 0]
+
+    host = kwargs.get("host")
+    api_key = kwargs.get("api_key")
+    if not host or not api_key:
+        print("Please specify host and api_key")
+        sys.exit()
+
+    fl = FileLoader(host, api_key)
+
+    file_path = kwargs.get("file_path")
+    file_id = kwargs.get("file_id")
+    file_name = kwargs.get("file_name")
+
+    parent_project = kwargs.get("parent_project")
+    parent_type = kwargs.get("parent_type")
+    parent_id = kwargs.get("parent_id")
+    parent = None
+    if parent_project and parent_type and parent_id:
+        parent = {
+            "project": parent_project,
+            "type": parent_type,
+            "id": parent_id
+        }
+    download_folder = kwargs.get("download_folder")
+    overwrite = kwargs.get("overwrite")
+    if overwrite:
+        if overwrite.lower() == "true":
+            overwrite = True
+        else:
+            overwrite = False
+    else:
+        overwrite = False
+
+
+    command = args[0]
+
+    if command == "upload":
+        file_id = fl.uploadFile(file_path, file_name, parent)
+
+    elif command == "update":
+        fl.updateFile(file_id, file_path, file_name)
+
+    elif command == "download":
+        fl.downloadFile(file_id, download_folder, overwrite)
+
+    else:
+        print("Unknown command")
+
