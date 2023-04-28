@@ -1,19 +1,17 @@
 from FileLoader import FileLoader
-import os
 import requests
 
-# host = "https://test.furthrmind.app"
-host = "http://127.0.0.1:5000"
-
-# api_key is saved in home directory
-home = os.path.expanduser("~")
-with open(f"{home}/furthrmind_test_apikey.txt") as f:
-    api_key = f.read()
-
 # init file_loader
+host = "you host"
+api_key = "your api_key"
 file_loader = FileLoader(host, api_key)
 
-# get a test parent from a test project
+# To attach the file to a parent object, specify parent_project_name name, parent_type and parent_name.
+# The script will search for the correct project_id and parent_id
+parent_project_name = "Test"
+parent_type = "experiment"
+parent_name = "Name of experiment"
+
 session = requests.session()
 session.headers.update({"X-API-KEY": api_key})
 
@@ -29,13 +27,16 @@ for project in projects:
                 break
         break
 
+
 if project_id and exp_id:
+    print("upload with parent")
     parent = {"project":project_id,
               "id": exp_id,
               "type": "experiment"}
-    print(parent)
     file_id = file_loader.uploadFile("test_file.txt", parent=parent)
-    print(file_id)
+else:
+    print("upload without parent")
+    file_id = file_loader.uploadFile("test_file.txt")
 
-    print(file_loader.downloadFile(file_id, "test_download"))
+print(file_loader.downloadFile(file_id, "test_download"))
 
