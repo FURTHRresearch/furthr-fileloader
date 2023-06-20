@@ -190,7 +190,7 @@ class FileLoader:
                 if chunk:  # filter out keep-alive new chunks
                     newFile.write(chunk)
 
-        print(f"Download successful, file_id: {file_id}")
+        print(f"Download successful, file_id: {fileID}")
 
         return True, filePath
 
