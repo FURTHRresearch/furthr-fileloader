@@ -38,7 +38,7 @@ class FileLoader:
         if not result:
             print("Upload not successful")
             return
-        print(f"Upload successful, file_id: {file_id}")
+        print(f"Upload successful, file_id: {fileID}")
         if parent and result:
             _print = False
             if "type" not in parent:
