@@ -38,7 +38,7 @@ class FileLoader:
         if not result:
             print("Upload not successful")
             return
-        print(f"Upload successful, file_id: {file_id}")
+        print(f"Upload successful, file_id: {fileID}")
         if parent and result:
             _print = False
             if "type" not in parent:
@@ -51,7 +51,7 @@ class FileLoader:
                 print("parent must have the following structure: {project: project_id, type: x, id: item_id}\n "
                       "The type must be one out of: experiment, sample, researchitem, corresponding to your parent")
                 return fileID
-            response = self.session.get(f"{self.host}/api2/project/{parent['project']}/{parent['type']}")
+            response = self.session.get(f"{self.host}/api2/project/{parent['project']}/{parent['type']}/{parent['id']}")
             item = response.json()["results"][0]
             files = item["files"]
             files.append({"id": fileID})
