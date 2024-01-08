@@ -23,6 +23,8 @@ class FileLoader:
         self.s3Enabled = response.json()["enabled"]
 
     def uploadFile(self, filePath, fileName=None, parent=None):
+        if fileName == None:
+            fileName = filePath
         if not self.host:
             print("Check if your host is correct!")
             return
