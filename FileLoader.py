@@ -57,7 +57,7 @@ class FileLoader:
             item = response.json()["results"][0]
             files = item["files"]
             files.append({"id": fileID})
-            parameter = {"id": parent["id"],
+            parameter = {"id": item["id"],
                          "files": files}
             response = self.session.post(f"{self.host}/api2/project/{parent['project']}/{parent['type']}", json=parameter)
             if response.status_code != 200:
